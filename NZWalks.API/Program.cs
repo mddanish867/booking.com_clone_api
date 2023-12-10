@@ -19,6 +19,7 @@ options.UseSqlServer(builder.Configuration.GetConnectionString("NZWalksConnectio
 // Injected Repository
 // Use nuge package AutoMapper Injection
 builder.Services.AddScoped<IRegionRepository,SQLRegionRepository>();
+builder.Services.AddScoped<IWalkRepository, SQLWalkRepository>();
 
 // Injectd AutoMapper
 builder.Services.AddAutoMapper(typeof(AutoMapperProfiles));
