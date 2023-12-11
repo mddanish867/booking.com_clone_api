@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NZWalks.API.CustomeActionFilter;
 using NZWalks.API.Data;
 using NZWalks.API.Models.Domain;
 using NZWalks.API.Models.DTO;
@@ -85,81 +86,89 @@ namespace NZWalks.API.Controllers
 
         // Post Create new Region
         [HttpPost]
+        [ValidateModel]
         public async Task<IActionResult> Create([FromBody] AddRegionRequestDto addRegionRequestDto)
         {
-            // Map or Convert DTO to Domai model
+           
+                // Map or Convert DTO to Domai model
 
-            //var regionDomainModel = new Region
-            //{
-            //    Code = addRegionRequestDto.Code,
-            //    Name = addRegionRequestDto.Name,
-            //    RegionImageUrl = addRegionRequestDto.RegionImageUrl,
-            //};
+                //var regionDomainModel = new Region
+                //{
+                //    Code = addRegionRequestDto.Code,
+                //    Name = addRegionRequestDto.Name,
+                //    RegionImageUrl = addRegionRequestDto.RegionImageUrl,
+                //};
 
-            //============================= OR ==========================
-            // Using Automapper makes much clear code as compare to above method
-            var regionDomainModel = mapper.Map<Region>(addRegionRequestDto);
+                //============================= OR ==========================
+                // Using Automapper makes much clear code as compare to above method
 
-            regionDomainModel =  await regionRepository.CreateAsync(regionDomainModel);
+                var regionDomainModel = mapper.Map<Region>(addRegionRequestDto);
 
-            // Map Domain model back to DTO
+                regionDomainModel = await regionRepository.CreateAsync(regionDomainModel);
 
-            //var regionDto = new RegionDto
-            //{
-            //    Id = regionDomainModel.Id,
-            //    Code = regionDomainModel.Code,
-            //    Name = regionDomainModel.Name,
-            //    RegionImageUrl = regionDomainModel.RegionImageUrl,
-            //};
-            //return CreatedAtAction(nameof(GetbyId), new { id = regionDto.Id }, regionDto);
+                // Map Domain model back to DTO
+
+                //var regionDto = new RegionDto
+                //{
+                //    Id = regionDomainModel.Id,
+                //    Code = regionDomainModel.Code,
+                //    Name = regionDomainModel.Name,
+                //    RegionImageUrl = regionDomainModel.RegionImageUrl,
+                //};
+                //return CreatedAtAction(nameof(GetbyId), new { id = regionDto.Id }, regionDto);
 
 
-            //============================= OR ==========================
-            // Using Automapper makes much clear code as compare to above method
+                //============================= OR ==========================
+                // Using Automapper makes much clear code as compare to above method
 
-            var regionDto = mapper.Map<RegionDto>(regionDomainModel);
-            return CreatedAtAction(nameof(GetbyId), new { id = regionDto.Id }, regionDto);
+                var regionDto = mapper.Map<RegionDto>(regionDomainModel);
+                return CreatedAtAction(nameof(GetbyId), new { id = regionDto.Id }, regionDto);
+           
         }
 
         // Put Update region
         [HttpPut]
         [Route("{id:Guid}")]
+        [ValidateModel]
         public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateRegionRequestDto updateRegionRequestDto)
         {
-            //var regionDomainModel = new Region
-            //{
-            //    Code = updateRegionRequestDto.Code,
-            //    Name = updateRegionRequestDto.Name,
-            //    RegionImageUrl = updateRegionRequestDto.RegionImageUrl
-            //};
+            
+                //var regionDomainModel = new Region
+                //{
+                //    Code = updateRegionRequestDto.Code,
+                //    Name = updateRegionRequestDto.Name,
+                //    RegionImageUrl = updateRegionRequestDto.RegionImageUrl
+                //};
 
-            //============================= OR ==========================
-            // Using Automapper makes much clear code as compare to above method
-            var regionDomainModel =  mapper.Map<Region>(updateRegionRequestDto);
+                //============================= OR ==========================
+                // Using Automapper makes much clear code as compare to above method
+                var regionDomainModel = mapper.Map<Region>(updateRegionRequestDto);
 
-            // Check if region exist
-            regionDomainModel = await regionRepository.UpdateAsync(id, regionDomainModel);
+                // Check if region exist
+                regionDomainModel = await regionRepository.UpdateAsync(id, regionDomainModel);
 
-            if (regionDomainModel == null)
-            {
-                return NotFound();
-            }
+                if (regionDomainModel == null)
+                {
+                    return NotFound();
+                }
 
-            // Convert Domain model back to DTO
-            //var regionDto = new RegionDto
-            //{
-            //    Id = regionDomainModel.Id,
-            //    Code = regionDomainModel.Code,
-            //    Name = regionDomainModel.Name,
-            //    RegionImageUrl = regionDomainModel.RegionImageUrl,
-            //};
-            //return Ok(regionDto);
+                // Convert Domain model back to DTO
+                //var regionDto = new RegionDto
+                //{
+                //    Id = regionDomainModel.Id,
+                //    Code = regionDomainModel.Code,
+                //    Name = regionDomainModel.Name,
+                //    RegionImageUrl = regionDomainModel.RegionImageUrl,
+                //};
+                //return Ok(regionDto);
 
-            //============================= OR ==========================
-            // Using Automapper makes much clear code as compare to above method
+                //============================= OR ==========================
+                // Using Automapper makes much clear code as compare to above method
 
-            var regionDto = mapper.Map<RegionDto>(regionDomainModel);
-            return Ok(regionDto);
+                var regionDto = mapper.Map<RegionDto>(regionDomainModel);
+                return Ok(regionDto);
+            
+          
         }
 
         // Delete Delete region
