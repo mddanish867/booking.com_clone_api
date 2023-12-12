@@ -40,8 +40,11 @@ namespace NZWalks.API.Controllers
             [FromQuery] int pageSize = 1000)
         {
             // Map Dto to Domain model
-            var walksDomainModel = await walkRepository.GetAllAsync(filterOn, filterQuery,sortBy,isAscending ?? true, pageNumber,pageSize);
+            var walksDomainModel = await walkRepository.GetAllAsync(filterOn, filterQuery,sortBy,
+                isAscending ?? true, pageNumber,pageSize);
 
+            // Create an Exception
+            //throw new Exception("This is new exception");
             // Map Domain Model to Dto
             return Ok(mapper.Map<List<WalkDto>>(walksDomainModel));
         }

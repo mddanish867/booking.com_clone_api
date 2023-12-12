@@ -7,13 +7,24 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using NZWalks.API.Data;
 using NZWalks.API.Mappings;
+using NZWalks.API.Middlewares;
 using NZWalks.API.Repositories;
+using Serilog;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Serilog Console to get information on console window
+var logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    // To get log in text file opion above line sufficient ot handle the log
+    .WriteTo.File("Logs/NZWalks_Log.txt",rollingInterval: RollingInterval.Minute)
+    .MinimumLevel.Information()
+    .CreateLogger();
+builder.Logging.ClearProviders();
+builder.Logging.AddSerilog(logger);
 
+// Add services to the container.
 builder.Services.AddControllers();
 
 // to upload image on server
@@ -62,7 +73,7 @@ options.UseSqlServer(builder.Configuration.GetConnectionString("NZWalksAuthConne
 
 // Injected Repository
 // Use nuge package AutoMapper Injection
-builder.Services.AddScoped<IRegionRepository,SQLRegionRepository>();
+builder.Services.AddScoped<IRegionRepository, SQLRegionRepository>();
 builder.Services.AddScoped<IWalkRepository, SQLWalkRepository>();
 builder.Services.AddScoped<ITokenRepository, TokenRepositoryToken>();
 builder.Services.AddScoped<IImageRepository, ImageRepository>();
@@ -77,10 +88,10 @@ builder.Services.AddIdentityCore<IdentityUser>()
     .AddDefaultTokenProviders();
 builder.Services.Configure<IdentityOptions>(options =>
 {
-    options.Password.RequireDigit= false;
-    options.Password.RequireLowercase= false;
-    options.Password.RequireNonAlphanumeric= false;
-    options.Password.RequireUppercase= false;
+    options.Password.RequireDigit = false;
+    options.Password.RequireLowercase = false;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireUppercase = false;
     options.Password.RequiredLength = 6;
     options.Password.RequiredUniqueChars = 1;
 });
@@ -92,9 +103,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
-        ValidateAudience=true,
-        ValidateLifetime=  true,
-        ValidateIssuerSigningKey= true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
         ValidIssuer = builder.Configuration["Jwt:Issuer"],
         ValidAudience = builder.Configuration["Jwt:Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(
@@ -112,6 +123,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// Global exception handler
+app.UseMiddleware<ExceptionHandlerMiddleware>();
+
 app.UseHttpsRedirection();
 
 // Authentication
@@ -122,8 +136,7 @@ app.UseAuthorization();
 app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "Images")),
-    RequestPath="/Images"
-    //https://localhost:1234/Images
+    RequestPath = "/Images"
 });
 
 app.MapControllers();

@@ -8,6 +8,7 @@ using NZWalks.API.Data;
 using NZWalks.API.Models.Domain;
 using NZWalks.API.Models.DTO;
 using NZWalks.API.Repositories;
+using System.Text.Json;
 
 namespace NZWalks.API.Controllers
 {
@@ -18,12 +19,17 @@ namespace NZWalks.API.Controllers
         private readonly NZWalksDbContext dbContext;
         private readonly IRegionRepository regionRepository;
         private readonly IMapper mapper;
+        private readonly ILogger<RegionsController> logger;
 
-        public RegionsController(NZWalksDbContext dbContext, IRegionRepository regionRepository, IMapper mapper)
+        public RegionsController(NZWalksDbContext dbContext, 
+            IRegionRepository regionRepository, 
+            IMapper mapper,
+            ILogger<RegionsController> logger)
         {
             this.dbContext = dbContext;
             this.regionRepository = regionRepository;
             this.mapper = mapper;
+            this.logger = logger;
         }
 
         // Get all regions
@@ -31,27 +37,40 @@ namespace NZWalks.API.Controllers
         [Authorize(Roles ="Reader")]
         public async Task<IActionResult> GetAll()
         {
-            // Get data from dtaabase - Domain models
-            var regionsDomain = await regionRepository.GetAllAsync();
+            try
+            {
+                //throw new Exception("This is custome exception");
 
-            // Map Domain Modes to Dtos
-            //var regionDto = new List<RegionDto>();
-            //foreach (var region in regionsDomain)
-            //{
-            //    regionDto.Add(new RegionDto()
-            //    {
-            //        Id = region.Id,
-            //        Code = region.Code,
-            //        Name = region.Name,
-            //        RegionImageUrl = region.RegionImageUrl,
-            //    });
-            //}
+                // Get data from dtaabase - Domain models
+                var regionsDomain = await regionRepository.GetAllAsync();
 
-            //============================= OR ==========================
-            // Using Automapper makes much clear code as compare to above method
+                // Log response
+                logger.LogInformation($"Finished GetAllRegion request data: {JsonSerializer.Serialize(regionsDomain)}");
+                // Map Domain Modes to Dtos
+                //var regionDto = new List<RegionDto>();
+                //foreach (var region in regionsDomain)
+                //{
+                //    regionDto.Add(new RegionDto()
+                //    {
+                //        Id = region.Id,
+                //        Code = region.Code,
+                //        Name = region.Name,
+                //        RegionImageUrl = region.RegionImageUrl,
+                //    });
+                //}
 
-             var regionDto = mapper.Map<List<RegionDto>>(regionsDomain);
-            return Ok(regionDto);
+                //============================= OR ==========================
+                // Using Automapper makes much clear code as compare to above method
+
+                var regionDto = mapper.Map<List<RegionDto>>(regionsDomain);
+                return Ok(regionDto);
+            }
+            catch(Exception ex)
+            {
+                logger.LogError(ex, ex.Message);
+                throw;
+            }
+           
         }
 
         //Get region by Id
