@@ -1,0 +1,22 @@
+﻿@model IEnumerable<NZWalks.UI.Models.DTO.RegionDto>
+<h1 class="mt-3">Region</h1>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Code</th>
+            <th>Name</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach(var walk in Model)
+        {
+            <tr>
+                <td>@walk.Id</td>
+                <td>@walk.Code</td>
+                <td>@walk.Name</td>
+            </tr>
+        }
+    </tbody>
+</table>
