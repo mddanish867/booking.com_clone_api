@@ -1,3 +1,4 @@
+using Booking.Com_Clone_API.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -18,7 +19,7 @@ var builder = WebApplication.CreateBuilder(args);
 var logger = new LoggerConfiguration()
     .WriteTo.Console()
     // To get log in text file opion above line sufficient ot handle the log
-    .WriteTo.File("Logs/NZWalks_Log.txt",rollingInterval: RollingInterval.Minute)
+    .WriteTo.File("Logs/Booking_logs.txt",rollingInterval: RollingInterval.Minute)
     .MinimumLevel.Information()
     .CreateLogger();
 builder.Logging.ClearProviders();
@@ -32,10 +33,11 @@ builder.Services.AddHttpContextAccessor();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 
+
 // Open the Authorization Bearer Token in Swagger
 builder.Services.AddSwaggerGen(options =>
 {
-    options.SwaggerDoc("v1", new OpenApiInfo { Title = "NZ Walks API", Version = "v1" });
+    options.SwaggerDoc("v1", new OpenApiInfo { Title = "Booking.com API", Version = "v1" });
     options.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -65,37 +67,17 @@ builder.Services.AddSwaggerGen(options =>
 
 // Add DbContext class to connect with database and reate connectin string
 builder.Services.AddDbContext<NZWalksDbContext>(options =>
-options.UseSqlServer(builder.Configuration.GetConnectionString("NZWalksConnectionString")));
-
-// Add DbContext class for Auth to connect with database and reate connectin string
-builder.Services.AddDbContext<NZWalksAuthDbContext>(options =>
-options.UseSqlServer(builder.Configuration.GetConnectionString("NZWalksAuthConnectionString")));
-
+options.UseSqlServer(builder.Configuration.GetConnectionString("BookingConnectionString")));
+// Email notification
+builder.Services.Configure<Booking.Com_Clone_API.Models.Domain.EmailConfiguration>(builder.Configuration.GetSection("EmailConfiguration"));
 // Injected Repository
 // Use nuge package AutoMapper Injection
 builder.Services.AddScoped<IRegionRepository, SQLRegionRepository>();
-builder.Services.AddScoped<IWalkRepository, SQLWalkRepository>();
 builder.Services.AddScoped<ITokenRepository, TokenRepositoryToken>();
 builder.Services.AddScoped<IImageRepository, ImageRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 // Injectd AutoMapper
 builder.Services.AddAutoMapper(typeof(AutoMapperProfiles));
-
-//================== Start Inject Identity for Auth===============
-builder.Services.AddIdentityCore<IdentityUser>()
-    .AddRoles<IdentityRole>()
-    .AddTokenProvider<DataProtectorTokenProvider<IdentityUser>>("NZWalks")
-    .AddEntityFrameworkStores<NZWalksAuthDbContext>()
-    .AddDefaultTokenProviders();
-builder.Services.Configure<IdentityOptions>(options =>
-{
-    options.Password.RequireDigit = false;
-    options.Password.RequireLowercase = false;
-    options.Password.RequireNonAlphanumeric = false;
-    options.Password.RequireUppercase = false;
-    options.Password.RequiredLength = 6;
-    options.Password.RequiredUniqueChars = 1;
-});
-//================== End Inject Identity for Auth ===============
 
 //============================= Start Jwt Authentication =================
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -138,6 +120,11 @@ app.UseStaticFiles(new StaticFileOptions
     FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "Images")),
     RequestPath = "/Images"
 });
+
+app.MapControllerRoute(    
+        name: "verify-email",
+        pattern: "verify-email/{email}/{token}",
+        defaults: new { controller = "User", action = "VerifyEmailAsync" });
 
 app.MapControllers();
 

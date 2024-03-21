@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Booking.Com_Clone_API.Models.Domain;
+using Booking.Com_Clone_API.Models.DTO;
 using NZWalks.API.Models.Domain;
 using NZWalks.API.Models.DTO;
 
@@ -11,13 +13,9 @@ namespace NZWalks.API.Mappings
         {
               CreateMap<Region,RegionDto>().ReverseMap();
             CreateMap<AddRegionRequestDto,Region>().ReverseMap();
-            CreateMap<UpdateRegionRequestDto, Region>().ReverseMap();
-            CreateMap<AddWalkRequestDto,Walk>().ReverseMap();
-            CreateMap<Walk, WalkDto>().ReverseMap();
-            CreateMap<Difficulty, DifficultyDto>().ReverseMap();
-            CreateMap<UpdateWalkRequestDto, Walk>().ReverseMap();
-
-
+            CreateMap<UpdateRegionRequestDto, Region>().ReverseMap();         
+            CreateMap<UserDto, User>().ReverseMap();
+            CreateMap<VerificationDto, User>().ReverseMap();
         }
     }
 
