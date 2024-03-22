@@ -91,7 +91,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         ValidIssuer = builder.Configuration["Jwt:Issuer"],
         ValidAudience = builder.Configuration["Jwt:Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+            Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"]))
     });
 //============================= End Jwt Authentication =================
 
@@ -125,6 +125,10 @@ app.MapControllerRoute(
         name: "verify-email",
         pattern: "verify-email/{email}/{token}",
         defaults: new { controller = "User", action = "VerifyEmailAsync" });
+app.MapControllerRoute(
+        name: "reset-password",
+        pattern: "reset-password/{email}/{token}",
+        defaults: new { controller = "User", action = "ResetPassword" });
 
 app.MapControllers();
 
