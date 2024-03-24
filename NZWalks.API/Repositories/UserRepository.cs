@@ -200,7 +200,6 @@ namespace Booking.Com_Clone_API.Repositories
             {
                 From = new MailAddress(fromAddress, fromName),
                 Subject = "Reset your password",
-                //Body = $"Please click the following link to verify your email: https://localhost:7151/api/User/verify-email?email={email}&token={token}",
                 IsBodyHtml = true
             };
             emailMessage.To.Add(email);
