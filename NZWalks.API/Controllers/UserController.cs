@@ -8,7 +8,6 @@ using Microsoft.IdentityModel.Tokens;
 using NZWalks.API.Controllers;
 using NZWalks.API.CustomeActionFilter;
 using NZWalks.API.Data;
-using NZWalks.API.Repositories;
 using System.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -24,13 +23,13 @@ namespace Booking.Com_Clone_API.Controllers
         private readonly NZWalksDbContext dbContext;
         private readonly IUserRepository userRepository;
         private readonly IMapper mapper;
-        private readonly ILogger<RegionsController> logger;
+        private readonly ILogger<UserController> logger;
         private readonly IConfiguration configuration; 
 
         public UserController(NZWalksDbContext dbContext,
             IUserRepository userRepository,
             IMapper mapper,
-            ILogger<RegionsController> logger,
+            ILogger<UserController> logger,
             IConfiguration configuration)
         {
             this.dbContext = dbContext;
@@ -39,6 +38,26 @@ namespace Booking.Com_Clone_API.Controllers
             this.logger = logger;
             this.configuration = configuration;
         }
+
+        [HttpPost("check-email")]
+        public async Task<IActionResult> CheckEmailExists([FromBody] UserDto userDto)
+        {
+            var user = await userRepository.EmailExistAsync(userDto.Email);
+            if (user == true)
+            {
+                // Email exists                
+                logger.LogInformation($"Finished email check: {JsonSerializer.Serialize("email alraedy exists")}");
+
+                return Ok("email already exits!");
+            }
+            else
+            {
+                // Email does not exist
+                logger.LogInformation($"Finished email check: {JsonSerializer.Serialize("email not found!")}");
+                return NotFound("email not found");
+            }
+        }
+
 
         ///<summary>
         ///method to create new registration
@@ -51,16 +70,16 @@ namespace Booking.Com_Clone_API.Controllers
             try
             {
                 // Using Automapper makes much clear code as compare to above method
-                var regionDomainModel = mapper.Map<User>(userDto);
-                regionDomainModel = await userRepository.CreateUserAsync(regionDomainModel);
-                logger.LogInformation($"Finished User created request data: {JsonSerializer.Serialize(regionDomainModel)}");
+                var userDomainModel = mapper.Map<User>(userDto);
+                userDomainModel = await userRepository.CreateUserAsync(userDomainModel);
+                logger.LogInformation($"Finished User created request data: {JsonSerializer.Serialize(userDomainModel)}");
                 // Using Automapper makes much clear code as compare to above method
-                var regionDto = mapper.Map<UserDto>(regionDomainModel);
-                return Ok(regionDto);
+                var regionDtoModel = mapper.Map<UserDto>(userDomainModel);
+                return Ok(regionDtoModel);
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, ex.Message);
+                logger.LogError($"Finished User created request data: {JsonSerializer.Serialize("Email already exists")}");
                 throw;
             }
 
@@ -104,8 +123,8 @@ namespace Booking.Com_Clone_API.Controllers
                 var user = await dbContext.Users.FirstOrDefaultAsync(u => u.Email == loginDto.Email);
                 if (user != null)
                 {
-                    var checkpasswordResult = await dbContext.Users.FirstOrDefaultAsync(u => u.Password == loginDto.Password);
-                    if (checkpasswordResult != null)
+                    var decodePassword = BCrypt.Net.BCrypt.Verify(loginDto.Password, user.Password);
+                    if (decodePassword)
                     {
                         // Create Token
                         var jwtToken = userRepository.GenerateJwtToken(user);
@@ -129,34 +148,34 @@ namespace Booking.Com_Clone_API.Controllers
         }
 
         [HttpPost("forgot-password")]
-        public async Task<IActionResult> ForgotPassword(string email)
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto forgotPassword)
         {
-            var user = await dbContext.Users.FirstOrDefaultAsync(u => u.Email == email);
+            var user = await dbContext.Users.FirstOrDefaultAsync(u => u.Email == forgotPassword.Email);
             if (user == null)
             {
                 return BadRequest("User with the provided email does not exist.");
             }
 
             // Generate a password reset token
-            var token = userRepository.GenerateResetPasswordToken(user).ToString();
+            userRepository.GenerateResetPasswordToken(user).ToString();
 
             // Send password reset email
-            await userRepository.SendPasswordResetEmailAsync(user.Email, token);
+            await userRepository.SendPasswordResetEmailAsync(user.Email, user.ResetPasswordToken);
 
             return Ok("Password reset email sent successfully.");
         }
 
         [HttpPost("reset-password")]
-        public async Task<IActionResult> ResetPassword(string email, string token, string newPassword)
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto resetPassword)
         {
-            var user = await dbContext.Users.FirstOrDefaultAsync(u => u.Email == email);
-            if (user == null || user.ResetPasswordToken != token || user.ResetPasswordTokenExpiresAt < DateTime.UtcNow)
+            var user = await dbContext.Users.FirstOrDefaultAsync(u => u.Email == resetPassword.Email);
+            if (user == null || user.ResetPasswordToken != resetPassword.ResetPasswordToken || user.ResetPasswordTokenExpiresAt < DateTime.UtcNow)
             {
                 return BadRequest("Invalid or expired password reset token.");
             }
 
             // Reset the user's password
-            user.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
+            user.Password = BCrypt.Net.BCrypt.HashPassword(resetPassword.NewPassword);
             user.ResetPasswordToken = null;
             user.ResetPasswordTokenExpiresAt = null;
             await dbContext.SaveChangesAsync();

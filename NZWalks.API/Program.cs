@@ -1,7 +1,9 @@
+using Booking.Com_Clone_API.Models.Domain;
 using Booking.Com_Clone_API.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
@@ -9,7 +11,6 @@ using Microsoft.OpenApi.Models;
 using NZWalks.API.Data;
 using NZWalks.API.Mappings;
 using NZWalks.API.Middlewares;
-using NZWalks.API.Repositories;
 using Serilog;
 using System.Text;
 
@@ -68,14 +69,15 @@ builder.Services.AddSwaggerGen(options =>
 // Add DbContext class to connect with database and reate connectin string
 builder.Services.AddDbContext<NZWalksDbContext>(options =>
 options.UseSqlServer(builder.Configuration.GetConnectionString("BookingConnectionString")));
+// cloudinary service
+builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("Cloudinary"));
 // Email notification
 builder.Services.Configure<Booking.Com_Clone_API.Models.Domain.EmailConfiguration>(builder.Configuration.GetSection("EmailConfiguration"));
 // Injected Repository
 // Use nuge package AutoMapper Injection
-builder.Services.AddScoped<IRegionRepository, SQLRegionRepository>();
-builder.Services.AddScoped<ITokenRepository, TokenRepositoryToken>();
-builder.Services.AddScoped<IImageRepository, ImageRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<ICloudinaryImageRepository, CloudinaryImageRepository>();
+
 // Injectd AutoMapper
 builder.Services.AddAutoMapper(typeof(AutoMapperProfiles));
 
@@ -109,6 +111,11 @@ if (app.Environment.IsDevelopment())
 app.UseMiddleware<ExceptionHandlerMiddleware>();
 
 app.UseHttpsRedirection();
+
+// Start Enabled Cors to acees any endpoint 
+// WithExposedHeaders("*") to all headers
+app.UseCors(o => o.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin().WithExposedHeaders("*"));
+// Start Enabled Cors to acees any endpoint
 
 // Authentication
 app.UseAuthentication();

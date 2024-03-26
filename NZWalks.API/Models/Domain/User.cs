@@ -6,6 +6,7 @@ namespace Booking.Com_Clone_API.Models.Domain
     {
         [Key]
         public int Id { get; set; }
+        [Required]
         public string Email { get; set; }
         public string Password { get; set; }
         public string VerificationToken { get; set; } = null;

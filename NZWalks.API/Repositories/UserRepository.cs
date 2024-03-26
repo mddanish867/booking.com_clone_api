@@ -38,7 +38,7 @@ namespace Booking.Com_Clone_API.Repositories
             if (await EmailExistAsync(user.Email))
             {
                 throw new Exception("Email already exists");
-            }
+            }           
 
             // Generate verification token
             var token = Guid.NewGuid().ToString();
@@ -88,9 +88,7 @@ namespace Booking.Com_Clone_API.Repositories
             var emailMessage = new MailMessage
             {
                 From = new MailAddress(fromAddress, fromName),
-                Subject = "Verify your email",
-                //https://localhost:7151/api/User/verify-email?email=danishakhtar539%40gmail.com&token=fc60a64e-c2cb-4824-913d-0764040c1c1d
-                //Body = $"Please click the following link to verify your email: https://localhost:7151/api/User/verify-email?email={email}&token={token}",
+                Subject = "Verify your email",               
                 IsBodyHtml = true
             };
             emailMessage.To.Add(email);
@@ -217,7 +215,7 @@ namespace Booking.Com_Clone_API.Repositories
                     <h2 style=""background-color: #007bff; color: #fff; padding: 10px 20px; text-decoration: none; border-radius: 0px; margin-top:10px; margin-bottom:15px;width:200px;"">Booking-clone.com</h2>
                     <h2>Forgot your password?</h2>
                     <p>No worries - it happens!.<br/> Simply click on the button below to choose.<br/> a new one. It's as easy as that</p>
-                    <a href=""https://localhost:7151/api/User/reset-password?email=" + email + "&token=" + token + @""" style=""background-color: #007bff; color: #fff; padding: 10px 20px; text-decoration: none; border-radius: 5px;"">Reset password</a>
+                    <a href=""http://127.0.0.1:5173/resetpassword?email=" + email + "&token=" + token + @""" style=""background-color: #007bff; color: #fff; padding: 10px 20px; text-decoration: none; border-radius: 5px;"">Reset password</a>
                 </div>
                 
             </body>

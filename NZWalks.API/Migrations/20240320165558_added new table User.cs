@@ -18,7 +18,6 @@ namespace NZWalks.API.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Password = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ConfirmPassword = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     VerificationToken = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     IsVerified = table.Column<bool>(type: "bit", nullable: false)
                 },
