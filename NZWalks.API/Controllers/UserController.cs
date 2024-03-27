@@ -39,6 +39,9 @@ namespace Booking.Com_Clone_API.Controllers
             this.configuration = configuration;
         }
 
+        ///<summary>
+        ///method to check email already exists
+        /// </summary>
         [HttpPost("check-email")]
         public async Task<IActionResult> CheckEmailExists([FromBody] UserDto userDto)
         {

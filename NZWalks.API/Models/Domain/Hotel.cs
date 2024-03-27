@@ -1,50 +1,76 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Booking.Com_Clone_API.Models.Domain
 {
     public class Hotel
     {
-        [Key]
         public Guid Id { get; set; }
-        public int UserId { get; set; }
-        public string Name { get; set; }
-        public string City { get; set; }
-        public string Country { get; set; }
-        public string Description { get; set; }
-        public string Type { get; set; }
-        public int AdultCount { get; set; }
-        public int ChildCount { get; set; }
-        [NotMapped]
-        public Facilities HotelFacilities { get; set; } // Complex type for facilities
-        // Serialized property for storing facilities in the database
-        public string FacilitiesJson
-        {
-            get => HotelFacilities != null ? JsonSerializer.Serialize(HotelFacilities) : null;
-            set => HotelFacilities = value != null ? JsonSerializer.Deserialize<Facilities>(value) : null;
-        }
-        public decimal PricePerNight { get; set; }
-        public decimal StarRating { get; set; }
-        [NotMapped]
-        public Images ImageUrl { get; set; }
-        // Serialized property for storing facilities in the database
-        public string ImageUrlJson
-        {
-            get => ImageUrl != null ? JsonSerializer.Serialize(HotelFacilities) : null;
-            set => ImageUrl = value != null ? JsonSerializer.Deserialize<Images>(value) : null;
-        }
-        public DateTime LastUpdated { get; set; }
 
-        // Define a nested class for Facilities
-        public class Facilities
-        {
-            public List<string> FacilityList { get; set; }
-        }
-        // Define a nested class for Facilities
-        public class Images
-        {
-            public List<string> ImageUrls { get; set; }
-        }
+        public int UserId { get; set; }
+
+        [Required]
+        public string Name { get; set; }
+
+        [Required]
+        public string City { get; set; }
+
+        [Required]
+        public string Country { get; set; }
+
+        public string Description { get; set; }
+
+        public string Type { get; set; }
+
+        public int AdultCount { get; set; }
+
+        public int ChildCount { get; set; }
+
+        public decimal PricePerNight { get; set; }
+
+        public decimal StarRating { get; set; }
+
+        public DateTime LastUpdated { get; set; } = DateTime.UtcNow;
+       
+        // Property to get the URLs of images
+        [NotMapped] // This property is not mapped to the database
+        public List<string> ImageUrls => Images?.Select(image => image.Url).ToList();
+
+        // Navigation properties
+
+        // Define a one-to-many relationship with Facility entity
+        public virtual ICollection<Facility> HotelFacilities { get; set; }
+
+        // Define a one-to-many relationship with Image entity
+        public virtual ICollection<Image> Images { get; set; }
+    }
+
+    public class Facility
+    {
+        [Key]
+        public int Id { get; set; }
+        public string Name { get; set; }
+
+        // Define foreign key property
+        public Guid HotelId { get; set; }
+
+        // Define navigation property to Hotel entity
+        public virtual Hotel Hotel { get; set; }
+    }
+
+    public class Image
+    {
+        [Key]
+        public int Id { get; set; }
+        public string Url { get; set; }
+
+        // Define foreign key property
+        public Guid HotelId { get; set; }
+
+        // Define navigation property to Hotel entity
+        public virtual Hotel Hotel { get; set; }
     }
 }

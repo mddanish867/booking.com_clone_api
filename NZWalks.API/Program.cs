@@ -77,6 +77,7 @@ builder.Services.Configure<Booking.Com_Clone_API.Models.Domain.EmailConfiguratio
 // Use nuge package AutoMapper Injection
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ICloudinaryImageRepository, CloudinaryImageRepository>();
+builder.Services.AddScoped<IAddHotelRepository, AddHotelRepository>();
 
 // Injectd AutoMapper
 builder.Services.AddAutoMapper(typeof(AutoMapperProfiles));

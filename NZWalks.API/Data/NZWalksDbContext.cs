@@ -1,6 +1,6 @@
 ﻿using Booking.Com_Clone_API.Models.Domain;
 using Microsoft.EntityFrameworkCore;
-
+using System.Linq;
 namespace NZWalks.API.Data
 {
     public class NZWalksDbContext:DbContext
@@ -18,6 +18,8 @@ namespace NZWalks.API.Data
         // Only for manual entry to database
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            
+
             base.OnModelCreating(modelBuilder);
                        
         }
