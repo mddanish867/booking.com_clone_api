@@ -52,7 +52,7 @@ namespace Booking.Com_Clone_API.Repositories
                 var hotel = _context.Hotels
                     .Include(h => h.HotelFacilities) // Include hotel facilities
                     .Include(h => h.Images) // Include hotel images
-                    .FirstOrDefault(h => h.Id == id);
+                    .FirstOrDefault(h => h.UserId == id);
 
                 if (hotel == null)
                 {

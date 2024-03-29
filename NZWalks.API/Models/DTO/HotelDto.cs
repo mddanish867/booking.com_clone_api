@@ -5,7 +5,7 @@ namespace Booking.Com_Clone_API.Models.DTO
 {
     public class HotelDto
     {
-        public int UserId { get; set; }
+        public Guid UserId { get; set; }
         public string Name { get; set; }
         public string City { get; set; }
         public string Country { get; set; }

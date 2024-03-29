@@ -1,15 +1,19 @@
 ﻿using AutoMapper;
+using Azure;
 using Booking.Com_Clone_API.Models.Domain;
 using Booking.Com_Clone_API.Models.DTO;
 using Booking.Com_Clone_API.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json.Linq;
 using NZWalks.API.Controllers;
 using NZWalks.API.CustomeActionFilter;
 using NZWalks.API.Data;
+using Serilog.Parsing;
 using System.Data;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
@@ -24,8 +28,7 @@ namespace Booking.Com_Clone_API.Controllers
         private readonly IUserRepository userRepository;
         private readonly IMapper mapper;
         private readonly ILogger<UserController> logger;
-        private readonly IConfiguration configuration; 
-
+        private readonly IConfiguration configuration;
         public UserController(NZWalksDbContext dbContext,
             IUserRepository userRepository,
             IMapper mapper,
@@ -49,9 +52,14 @@ namespace Booking.Com_Clone_API.Controllers
             if (user == true)
             {
                 // Email exists                
-                logger.LogInformation($"Finished email check: {JsonSerializer.Serialize("email alraedy exists")}");
-
-                return Ok("email already exits!");
+                logger.LogInformation($"user email already exists.: {JsonSerializer.Serialize(user)}");
+                var response = new ResponseDto
+                {                   
+                    user_id = userDto.UserId,
+                    status= 200,
+                    message = "email already exists"
+                };
+                return Ok(response);                
             }
             else
             {
@@ -77,12 +85,18 @@ namespace Booking.Com_Clone_API.Controllers
                 userDomainModel = await userRepository.CreateUserAsync(userDomainModel);
                 logger.LogInformation($"Finished User created request data: {JsonSerializer.Serialize(userDomainModel)}");
                 // Using Automapper makes much clear code as compare to above method
-                var regionDtoModel = mapper.Map<UserDto>(userDomainModel);
-                return Ok(regionDtoModel);
+                var userDtoModel = mapper.Map<UserDto>(userDomainModel);
+
+                var response = new ResponseDto
+                {
+                    user_id = userDomainModel.UserId,
+                    user = userDtoModel
+                };
+                return Ok(new { response, message = "User registered successfully." });                          
             }
-            catch (Exception ex)
+            catch (Exception )
             {
-                logger.LogError($"Finished User created request data: {JsonSerializer.Serialize("Email already exists")}");
+                logger.LogError($"Finished User created request data: {JsonSerializer.Serialize("Registration failed.")}");
                 throw;
             }
 
@@ -103,8 +117,12 @@ namespace Booking.Com_Clone_API.Controllers
             var isVerified = await userRepository.VerifyEmailAsync(email, token);
             if (isVerified)
             {
-                logger.LogInformation($"Finished verification Successfull: {JsonSerializer.Serialize("Email verified successfully")}");
-                return Ok("Email verified successfully");
+                logger.LogInformation($"Finished verification Successfull: {JsonSerializer.Serialize(isVerified)}");
+                var response = new ResponseDto
+                {
+                    token = token
+                };
+                return Ok(new { response, message = "Email verified successfully" });              
             }
             else
             {
@@ -114,6 +132,9 @@ namespace Booking.Com_Clone_API.Controllers
                 
         }
 
+        ///<summary>
+        ///method to login user and generate JWT token
+        /// </summary>
         ///<summary>
         ///method to login user and generate JWT token
         /// </summary>
@@ -131,10 +152,18 @@ namespace Booking.Com_Clone_API.Controllers
                     {
                         // Create Token
                         var jwtToken = userRepository.GenerateJwtToken(user);
-                        var response = new LoginResponseDto
+                        var response = new ResponseDto
                         {
-                            JwtToken = jwtToken
+                            jwtToken = jwtToken,
+                            user_id = user.UserId
                         };
+                        // Set JWT token as HttpOnly cookie
+                        Response.Cookies.Append("jwtToken", jwtToken, new CookieOptions
+                        {
+                            HttpOnly = true,
+                            SameSite = SameSiteMode.Lax, // or SameSiteMode.Strict
+                            Secure = true // only send the cookie over HTTPS
+                        });
                         return Ok(response);
                     }
                 }
@@ -150,6 +179,10 @@ namespace Booking.Com_Clone_API.Controllers
             }
         }
 
+
+        ///<summary>
+        ///method to sent mail for password reset
+        /// </summary>
         [HttpPost("forgot-password")]
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto forgotPassword)
         {
@@ -160,14 +193,21 @@ namespace Booking.Com_Clone_API.Controllers
             }
 
             // Generate a password reset token
-            userRepository.GenerateResetPasswordToken(user).ToString();
+            var restToken = userRepository.GenerateResetPasswordToken(user).ToString();
 
             // Send password reset email
             await userRepository.SendPasswordResetEmailAsync(user.Email, user.ResetPasswordToken);
-
-            return Ok("Password reset email sent successfully.");
+            var response = new ResponseDto
+            {
+                email = forgotPassword.Email,
+                token = restToken
+            };
+            return Ok(new { response, message = "Password reset email sent successfully." });            
         }
 
+        ///<summary>
+        ///method to reset password
+        /// </summary>
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto resetPassword)
         {
@@ -182,8 +222,12 @@ namespace Booking.Com_Clone_API.Controllers
             user.ResetPasswordToken = null;
             user.ResetPasswordTokenExpiresAt = null;
             await dbContext.SaveChangesAsync();
-
-            return Ok("Password reset successfully.");
+            var response = new ResponseDto
+            {
+                email = resetPassword.Email,
+                token = user.ResetPasswordToken
+            };
+            return Ok(new { response, message = "Password reset successfully." });            
         }
 
     }

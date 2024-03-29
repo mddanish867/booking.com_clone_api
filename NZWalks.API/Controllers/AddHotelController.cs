@@ -76,7 +76,7 @@ namespace Booking.Com_Clone_API.Controllers
         {
             try
             {
-                if (hotelDto == null || images == null || images.Count == 0)
+                if (hotelDto == null )
                 {
                     _logger.LogInformation($"Paramters are null: {JsonSerializer.Serialize("Hotel data and at least one image file are required")}");
 

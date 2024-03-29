@@ -17,11 +17,10 @@ namespace NZWalks.API.Data
 
         // Only for manual entry to database
         protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            
+        {            
 
-            base.OnModelCreating(modelBuilder);
-                       
+            base.OnModelCreating(modelBuilder);         
+
         }
     }
 }

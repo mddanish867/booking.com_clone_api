@@ -5,7 +5,7 @@ namespace Booking.Com_Clone_API.Models.Domain
     public class User
     {
         [Key]
-        public int Id { get; set; }
+        public Guid UserId { get; set; }
         [Required]
         public string Email { get; set; }
         public string Password { get; set; }
