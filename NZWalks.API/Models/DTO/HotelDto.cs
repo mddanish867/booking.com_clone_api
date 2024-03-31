@@ -5,6 +5,7 @@ namespace Booking.Com_Clone_API.Models.DTO
 {
     public class HotelDto
     {
+        public Guid Id { get; set; }
         public Guid UserId { get; set; }
         public string Name { get; set; }
         public string City { get; set; }
@@ -17,7 +18,7 @@ namespace Booking.Com_Clone_API.Models.DTO
         public decimal StarRating { get; set; }
         public DateTime LastUpdated { get; set; } = DateTime.UtcNow;
         public List<string> HotelFacilities { get; set; }
-        public List<string> ImageUrls { get; set; }
+        public List<string> Images { get; set; }
     }
 
     

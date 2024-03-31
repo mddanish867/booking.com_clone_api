@@ -14,11 +14,11 @@ namespace NZWalks.API.Mappings
             CreateMap<LoginDto, User>().ReverseMap();
             //CreateMap<HotelDto, Hotel>().ReverseMap();
             CreateMap<HotelDto, Hotel>()
-           .ForMember(dest => dest.Images, opt => opt.MapFrom(src => src.ImageUrls.Select(url => new Image { Url = url }).ToList()))
+           .ForMember(dest => dest.Images, opt => opt.MapFrom(src => src.Images.Select(url => new Image { Url = url }).ToList()))
            .ForMember(dest => dest.HotelFacilities, opt => opt.MapFrom(src => src.HotelFacilities.Select(name => new Facility { Name = name }).ToList()));
 
             CreateMap<Hotel, HotelDto>()
-                .ForMember(dest => dest.ImageUrls, opt => opt.MapFrom(src => src.Images.Select(image => image.Url).ToList()))
+                .ForMember(dest => dest.Images, opt => opt.MapFrom(src => src.Images.Select(image => image.Url).ToList()))
                 .ForMember(dest => dest.HotelFacilities, opt => opt.MapFrom(src => src.HotelFacilities.Select(facility => facility.Name).ToList()));
         }
     }

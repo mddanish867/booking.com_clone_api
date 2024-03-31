@@ -51,9 +51,9 @@ namespace Booking.Com_Clone_API.Models.Domain
     public class Facility
     {
         [Key]
-        public int Id { get; set; }
+        public Guid FacilityId { get; set; }
         public string Name { get; set; }
-
+        public Guid UserId { get; set; }
         // Define foreign key property
         public Guid HotelId { get; set; }
 
@@ -66,7 +66,7 @@ namespace Booking.Com_Clone_API.Models.Domain
         [Key]
         public int Id { get; set; }
         public string Url { get; set; }
-
+        public Guid UserId { get; set; }
         // Define foreign key property
         public Guid HotelId { get; set; }
 

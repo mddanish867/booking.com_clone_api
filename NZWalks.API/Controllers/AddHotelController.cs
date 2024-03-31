@@ -45,26 +45,35 @@ namespace Booking.Com_Clone_API.Controllers
         ///<summary>
         ///endpoint to get hotel based on id
         /// </summary>
-        [HttpGet("get-hotel/{id}")]
-        public ActionResult<HotelDto> GetHotelById(Guid id)
+        [HttpGet("get-hotel")]
+        public ActionResult<HotelDto> GetHotelById(Guid? userId = null, Guid? hotelId = null)
         {
             try
             {
-                var hotel = _hotelRepository.GetHotelById(id);
-                _logger.LogInformation($"Finished hotel retrieval based on id: {JsonSerializer.Serialize(hotel)}");
+                var hotel = _hotelRepository.GetHotelById(userId, hotelId);
+
+                if (hotel == null)
+                {
+                    _logger.LogInformation("Hotel not found");
+                    return NotFound("Hotel not found");
+                }
+
+                _logger.LogInformation($"Finished hotel retrieval based on userId or hotelId: {JsonSerializer.Serialize(hotel)}");
                 return Ok(hotel);
             }
             catch (KeyNotFoundException)
             {
-                _logger.LogInformation($"Retrieval failed: {JsonSerializer.Serialize("Hotel not found")}");
+                _logger.LogInformation("Retrieval failed: Hotel not found");
                 return NotFound("Hotel not found");
             }
             catch (Exception ex)
             {
-                _logger.LogInformation($"Internal Server Error:: {JsonSerializer.Serialize(ex.Message)}");
+                _logger.LogInformation($"Internal Server Error: {ex.Message}");
                 return StatusCode(500, $"Internal Server Error: {ex.Message}");
             }
         }
+
+
 
 
 
@@ -72,7 +81,7 @@ namespace Booking.Com_Clone_API.Controllers
         ///endpoint to add hotel
         /// </summary>
         [HttpPost("add-hotel")]
-        public async Task<ActionResult<Guid>> AddHotel([FromForm] HotelDto hotelDto, [FromForm] List<IFormFile> images)
+        public async Task<ActionResult<Guid>> AddHotel([FromForm] HotelDto hotelDto)
         {
             try
             {
@@ -84,7 +93,7 @@ namespace Booking.Com_Clone_API.Controllers
                 }
 
                 // Call repository method to add hotel
-                var hotelId = await _hotelRepository.AddHotelAsync(hotelDto, images);
+                var hotelId = await _hotelRepository.AddHotelAsync(hotelDto);
                 _logger.LogInformation($"Hotel added successfully: {JsonSerializer.Serialize(hotelId)}");
                 return CreatedAtAction(nameof(GetHotelById), new { id = hotelId }, hotelId);
             }

@@ -16,13 +16,12 @@ namespace Booking.Com_Clone_API.Repositories
         ///<summary>
         ///method to get hotel details based on id
         /// </summary>
-        HotelDto GetHotelById(Guid id);
-
+        IEnumerable<HotelDto> GetHotelById(Guid? userId, Guid? hotelId);
         ///<summary>
         ///method to add hotels
         /// </summary>
         /// 
-        Task<Guid> AddHotelAsync(HotelDto hotelDto, List<IFormFile> images);
+        Task<Guid> AddHotelAsync(HotelDto hotelDto);
 
         ///<summary>
         ///method to update hotl record
