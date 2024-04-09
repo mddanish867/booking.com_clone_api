@@ -46,6 +46,10 @@ namespace Booking.Com_Clone_API.Models.Domain
 
         // Define a one-to-many relationship with Image entity
         public virtual ICollection<Image> Images { get; set; }
+
+        // Define a one-to-many relationship with Addresses entity
+        //public virtual ICollection<Image> Addresses { get; set; }
+
     }
 
     public class Facility
@@ -69,8 +73,21 @@ namespace Booking.Com_Clone_API.Models.Domain
         public Guid UserId { get; set; }
         // Define foreign key property
         public Guid HotelId { get; set; }
-
         // Define navigation property to Hotel entity
         public virtual Hotel Hotel { get; set; }
     }
+
+    //public class UserAddresses
+    //{
+    //    [Key]
+    //    public Guid AddressId { get; set; }
+    //    public Guid UserId { get; set; }
+    //    public string FirstName { get; set; }
+    //    public string LastName { get; set; }
+    //    public string Email { get; set; }
+    //    public string Mobile { get; set; }
+    //    public bool IsDefault { get; set; }
+    //    // Define navigation property to Hotel entity
+    //    public virtual Hotel Hotel { get; set; }
+    //}
 }

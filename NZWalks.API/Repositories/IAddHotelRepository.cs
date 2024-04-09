@@ -17,6 +17,7 @@ namespace Booking.Com_Clone_API.Repositories
         ///method to get hotel details based on id
         /// </summary>
         IEnumerable<HotelDto> GetHotelById(Guid? userId, Guid? hotelId);
+
         ///<summary>
         ///method to add hotels
         /// </summary>

@@ -1,4 +1,5 @@
-﻿using Booking.Com_Clone_API.Models.Domain;
+﻿using AutoMapper;
+using Booking.Com_Clone_API.Models.Domain;
 using Booking.Com_Clone_API.Models.DTO;
 using MailKit.Security;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -22,11 +23,13 @@ namespace Booking.Com_Clone_API.Repositories
     {
         private readonly IConfiguration _configuration;
         private readonly NZWalksDbContext dbContext;
-        private readonly ILogger<UserRepository> logger;        
-        public UserRepository(NZWalksDbContext dbContext, ILogger<UserRepository> logger,IConfiguration configuration)
+        private readonly ILogger<UserRepository> logger;
+        private readonly IMapper _mapper;
+        public UserRepository(NZWalksDbContext dbContext, IMapper mapper, ILogger<UserRepository> logger,IConfiguration configuration)
         {
             this.dbContext = dbContext;
-            this.logger = logger;           
+            this.logger = logger;
+            _mapper = mapper;
             _configuration = configuration;
         }
 
@@ -251,6 +254,29 @@ namespace Booking.Com_Clone_API.Repositories
             user.ResetPasswordTokenExpiresAt = DateTime.UtcNow.AddHours(1); // Set token expiration time
             await dbContext.SaveChangesAsync();
             return token;
+        }
+
+        ///<summary>
+        ///method to add user address
+        /// </summary>
+        public async Task<Guid> AddUserAddressAsync(UserAddressDto userDto)
+        {
+            var userAddress = _mapper.Map<UserAddress>(userDto);
+
+            dbContext.Addresses.Add(userAddress);
+            await dbContext.SaveChangesAsync();
+            return userAddress.AddressId;
+        }
+
+        ///<summary>
+        ///method to get user address based on id
+        /// </summary>
+        public async Task<UserAddress> GetLatestUserAddressAsync(Guid userId)
+        {
+            return await dbContext.Addresses
+                .Where(a => a.UserId == userId)
+                .OrderByDescending(a => a.AddressId) // Assuming there's a CreatedAt property indicating when the address was created
+                .FirstOrDefaultAsync();
         }
     }
 }

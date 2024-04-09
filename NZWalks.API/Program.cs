@@ -78,6 +78,7 @@ builder.Services.Configure<Booking.Com_Clone_API.Models.Domain.EmailConfiguratio
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ICloudinaryImageRepository, CloudinaryImageRepository>();
 builder.Services.AddScoped<IAddHotelRepository, AddHotelRepository>();
+builder.Services.AddScoped<ISearchRepository, SearchRepository>();
 
 // Injectd AutoMapper
 builder.Services.AddAutoMapper(typeof(AutoMapperProfiles));

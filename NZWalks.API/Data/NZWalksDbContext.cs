@@ -13,6 +13,7 @@ namespace NZWalks.API.Data
         
         public DbSet<User> Users { get; set; }
         public DbSet<Hotel> Hotels { get; set; }
+        public DbSet<UserAddress> Addresses { get; set; }
 
 
         // Only for manual entry to database

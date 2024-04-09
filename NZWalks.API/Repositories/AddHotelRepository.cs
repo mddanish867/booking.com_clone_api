@@ -83,25 +83,22 @@ namespace Booking.Com_Clone_API.Repositories
         public async Task<Guid> AddHotelAsync(HotelDto hotelDto)
         {
             var hotel = _mapper.Map<Hotel>(hotelDto);
-            hotel.Images = hotelDto.Images.Select(url => new Image { Url = url }).ToList();
 
-            //// Upload images to Cloudinary
-            //var uploadedImageUrls = await UploadImagesToCloudinaryAsync(images);
+            // Map facility names to Facility entities
+            hotel.HotelFacilities = hotelDto.HotelFacilities
+                .Select(name => new Facility { Name = name, UserId = hotelDto.UserId })
+                .ToList();
 
-            //// Convert URLs to Image entities and add them to the hotel's Images collection
-            //hotel.Images = uploadedImageUrls.Select(url => new Image { Url = url }).ToList();
-
-            // Set UserId for facilities
-            foreach (var facility in hotel.HotelFacilities)
-            {
-                facility.UserId = hotelDto.UserId;
-            }
-         
+            // Map image URLs to Image entities
+            hotel.Images = hotelDto.Images
+                .Select(url => new Image { Url = url, UserId = hotelDto.UserId })
+                .ToList();
 
             _context.Hotels.Add(hotel);
             await _context.SaveChangesAsync();
-            return hotel.UserId;
+            return hotel.Id;
         }
+
 
         ///<summary>
         ///method to upload image on cloudinary

@@ -1,4 +1,5 @@
 ﻿using Booking.Com_Clone_API.Models.Domain;
+using Booking.Com_Clone_API.Models.DTO;
 
 namespace Booking.Com_Clone_API.Repositories
 {
@@ -41,5 +42,16 @@ namespace Booking.Com_Clone_API.Repositories
         ///method to send mail for verifying user
         /// </summary>
         Task SendPasswordResetEmailAsync(string email, string token);
+
+        ///<summary>
+        ///method to add user address
+        /// </summary>
+        /// 
+        Task<Guid> AddUserAddressAsync(UserAddressDto userDto);
+
+        ///<summary>
+        ///method to get user address based on id
+        /// </summary>
+        Task<UserAddress> GetLatestUserAddressAsync(Guid userId);
     }
 }

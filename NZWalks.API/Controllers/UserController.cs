@@ -230,5 +230,62 @@ namespace Booking.Com_Clone_API.Controllers
             return Ok(new { response, message = "Password reset successfully." });            
         }
 
+        ///<summary>
+        ///endpoint to add hotel
+        /// </summary>
+        [HttpPost("add-user-address")]
+        public async Task<ActionResult<Guid>> AddUserAddress([FromForm] UserAddressDto userDto)
+        {
+            try
+            {
+                if (userDto == null)
+                {
+                    logger.LogInformation($"Paramters are null: {JsonSerializer.Serialize("user data are required")}");
+
+                    return BadRequest("user data are required");
+                }
+
+                // Call repository method to add address
+                var addressId = await userRepository.AddUserAddressAsync(userDto);
+                logger.LogInformation($"Address added successfully: {JsonSerializer.Serialize(addressId)}");
+                //return CreatedAtAction(nameof(GetHotelById), new { id = hotelId }, hotelId);
+                return addressId;
+            }
+            catch (Exception ex)
+            {
+                logger.LogInformation($"Internal Server Error:: {JsonSerializer.Serialize(ex.Message)}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        ///<summary>
+        ///endpoint to get user address based on id
+        /// </summary>
+        [HttpGet("user-address/{userId}")]
+        public async Task<ActionResult<UserAddressDto>> GetLatestUserAddress(Guid userId)
+        {
+            try
+            {
+                // Retrieve the latest address associated with the provided userId
+                var latestAddress = await userRepository.GetLatestUserAddressAsync(userId);
+
+                // If no address is found, return a 404 Not Found response
+                if (latestAddress == null)
+                {
+                    return NotFound();
+                }
+
+                // Map the latest address to UserAddressDto and return
+                var addressDto = mapper.Map<UserAddressDto>(latestAddress);
+                return Ok(addressDto);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError($"Error retrieving latest address for user ID {userId}: {ex.Message}");
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+
     }
 }
